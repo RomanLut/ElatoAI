@@ -12,9 +12,10 @@
  */
 #include <WiFi.h>
 #include "AudioTools.h"
+#include "Config.h"
 
-const char *ssid = "<wifi>";
-const char *password = "<pw>";
+const char *ssid = "name";
+const char *password = "password";
 // AudioEncodedServer server(new WAVEncoder(),"ssid","password");
 AudioWAVServer server(ssid, password); // the same a above
 
@@ -49,6 +50,7 @@ void setup()
     // config.bits_per_sample = 32;
 
     // working well
+    /*
     config.i2s_format = I2S_STD_FORMAT;
     config.sample_rate = 44100;  // INMP441 supports up to 44.1kHz
     config.channels = 1;         // INMP441 is mono
@@ -58,6 +60,22 @@ void setup()
     config.pin_bck = 18;
     config.pin_data = 21;
     config.use_apll = true; // Try with APLL for better clock stability
+    */
+
+    config.bits_per_sample = 16;
+    config.sample_rate = 24000;
+    config.channels = 1;
+    config.signal_type = PDM;
+    config.i2s_format = I2S_LEFT_JUSTIFIED_FORMAT;
+    config.channel_format = I2S_CHANNEL_FMT_ONLY_LEFT;
+    //i2sConfig.i2s_format = I2S_PCM;
+    // Configure your I2S input pins appropriately here:
+    //i2sConfig.pin_bck = I2S_PIN_NO_CHANGE;
+    config.pin_ws  = I2S_WS;
+    config.pin_data = I2S_SD;
+    config.port_no = I2S_PORT_IN;
+
+
     i2sStream.begin(config);
     Serial.println("I2S started");
 

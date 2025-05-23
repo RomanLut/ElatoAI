@@ -72,7 +72,7 @@ void transitionToSpeaking() {
     
     if (xSemaphoreTake(wsMutex, pdMS_TO_TICKS(100)) == pdTRUE) {
         deviceState = SPEAKING;
-        digitalWrite(I2S_SD_OUT, HIGH);
+        //digitalWrite(I2S_SD_OUT, HIGH);
         speakingStartTime = millis();
         
         webSocket.enableHeartbeat(30000, 15000, 3);
@@ -98,7 +98,7 @@ void transitionToListening() {
 
     if (xSemaphoreTake(wsMutex, pdMS_TO_TICKS(100)) == pdTRUE) {
         deviceState = LISTENING;
-        digitalWrite(I2S_SD_OUT, LOW);
+        //digitalWrite(I2S_SD_OUT, LOW);
         webSocket.disableHeartbeat();
         xSemaphoreGive(wsMutex);
     }
@@ -107,7 +107,7 @@ void transitionToListening() {
 void audioStreamTask(void *parameter) {
     Serial.println("Starting I2S stream pipeline...");
     
-    pinMode(I2S_SD_OUT, OUTPUT);
+    //pinMode(I2S_SD_OUT, OUTPUT);
 
     OpusSettings cfg;
     cfg.sample_rate = SAMPLE_RATE;
@@ -189,10 +189,12 @@ void micTask(void *parameter) {
     i2sConfig.bits_per_sample = BITS_PER_SAMPLE;
     i2sConfig.sample_rate = SAMPLE_RATE;
     i2sConfig.channels = CHANNELS;
+    i2sConfig.signal_type = PDM;
     i2sConfig.i2s_format = I2S_LEFT_JUSTIFIED_FORMAT;
     i2sConfig.channel_format = I2S_CHANNEL_FMT_ONLY_LEFT;
+    //i2sConfig.i2s_format = I2S_PCM;
     // Configure your I2S input pins appropriately here:
-    i2sConfig.pin_bck = I2S_SCK;
+    i2sConfig.pin_bck = I2S_PIN_NO_CHANGE; //free GPIO6!
     i2sConfig.pin_ws  = I2S_WS;
     i2sConfig.pin_data = I2S_SD;
     i2sConfig.port_no = I2S_PORT_IN;
@@ -335,7 +337,9 @@ void websocketSetup(String server_domain, int port, String path)
 
 void networkTask(void *parameter) {
     while (1) {
+        xSemaphoreTake(wsMutex, portMAX_DELAY);
         webSocket.loop();
+        xSemaphoreGive(wsMutex);
         vTaskDelay(1);
     }
 }

@@ -21,7 +21,7 @@
 // ---------- Touch mode ----------
 // If you want to use the touch sensor to wake up the device, uncomment the following line
 // If you want to use the button to wake up the device, comment the following line
-#define TOUCH_MODE
+//#define TOUCH_MODE
 
 extern Preferences preferences;
 extern bool factory_reset_status;
@@ -49,6 +49,8 @@ enum DeviceState
 
 extern DeviceState deviceState;
 
+extern unsigned long lastActivity;
+
 // WiFi credentials
 extern const char *EAP_IDENTITY;
 extern const char *EAP_USERNAME;
@@ -69,6 +71,8 @@ extern const char *ws_path;
 extern const char *backend_server;
 extern const uint16_t backend_port;
 
+#define KEEP_ON_PIN 1
+
 // I2S and Audio parameters
 extern const uint32_t SAMPLE_RATE;
 
@@ -81,7 +85,7 @@ extern const gpio_num_t BUTTON_PIN;
 // I2S Microphone pins
 extern const int I2S_SD;
 extern const int I2S_WS;
-extern const int I2S_SCK;
+//extern const int I2S_SCK;
 extern const i2s_port_t I2S_PORT_IN;
 
 // I2S Speaker pins
@@ -89,7 +93,7 @@ extern const int I2S_WS_OUT;
 extern const int I2S_BCK_OUT;
 extern const int I2S_DATA_OUT;
 extern const i2s_port_t I2S_PORT_OUT;
-extern const int I2S_SD_OUT;
+//extern const int I2S_SD_OUT;
 
 // SSL certificate
 extern const char *CA_cert;

@@ -26,6 +26,10 @@ void enterSleep()
     
     // First, change device state to prevent any new data processing
     deviceState = IDLE;
+    scheduleListeningRestart = false;
+    vTaskDelay(10);  //let all tasks accept state
+
+    xSemaphoreTake(wsMutex, portMAX_DELAY);
 
     // Stop audio tasks first
     i2s_stop(I2S_PORT_IN);
@@ -58,6 +62,8 @@ void enterSleep()
     #endif
 
     esp_deep_sleep_start();
+    digitalWrite( KEEP_ON_PIN, LOW );  //full turnoff when on battery, deep sleep on charger
+    delay(1000);
 }
 
 void printOutESP32Error(esp_err_t err)
@@ -176,8 +182,11 @@ void setupDeviceMetadata() {
 
 void setup()
 {
+    pinMode(KEEP_ON_PIN, OUTPUT);
+    digitalWrite(KEEP_ON_PIN, HIGH);
+
     Serial.begin(115200);
-    delay(500);
+//    delay(500);
 
     // SETUP
     setupDeviceMetadata();
@@ -194,6 +203,8 @@ void setup()
         btn->attachDoubleClickEventCb(&onButtonDoubleClickCb, NULL);
         btn->detachSingleClickEvent();
     #endif
+
+    pinMode( BUTTON_PIN, INPUT);
 
     // Pin audio tasks to Core 1 (application core)
     xTaskCreatePinnedToCore(
@@ -246,4 +257,18 @@ void loop(){
     {
         loopOTA();
     }
+
+    //Serial.printf("Pin:%d\n ", digitalRead( BUTTON_PIN));
+
+    if ( deviceState == SPEAKING )
+    {
+        lastActivity = millis();
+    }
+
+    if ( ( millis() - lastActivity ) > ( deviceState == LISTENING ? 20 * 1000 : 60 * 1000 ) ) {
+        lastActivity = millis();
+        Serial.println("Sleeping due to inactivity...");
+        enterSleep();
+    }
+
 }

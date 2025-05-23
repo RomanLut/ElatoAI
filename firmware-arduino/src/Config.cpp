@@ -61,10 +61,13 @@ const uint16_t backend_port = 3000;
 String authTokenGlobal;
 DeviceState deviceState = IDLE;
 
+unsigned long lastActivity = millis();
+
 // I2S and Audio parameters
 const uint32_t SAMPLE_RATE = 24000;
 
 // ----------------- Pin Definitions -----------------
+/*
 const i2s_port_t I2S_PORT_IN = I2S_NUM_1;
 const i2s_port_t I2S_PORT_OUT = I2S_NUM_0;
 
@@ -82,7 +85,29 @@ const int I2S_DATA_OUT = 7;
 const int I2S_SD_OUT = 10;
 
 const gpio_num_t BUTTON_PIN = GPIO_NUM_2; // Only RTC IO are allowed - ESP32 Pin example
+*/
 
+const i2s_port_t I2S_PORT_IN = I2S_NUM_0;
+const i2s_port_t I2S_PORT_OUT = I2S_NUM_1;
+
+const int BLUE_LED_PIN = 5;
+const int RED_LED_PIN = 3;
+const int GREEN_LED_PIN = 4;
+
+const int I2S_SD = 41;  //PDM_DATA
+const int I2S_WS = 42;  //PDM_CLK
+//const int I2S_SCK = 1;
+
+#define I2S_MIC_DATA_IN 41
+#define I2S_MIC_WS 42
+
+
+const int I2S_WS_OUT = 43;    //LRC
+const int I2S_BCK_OUT = 2;    //Bit clock
+const int I2S_DATA_OUT = 44;  //Data out
+//const int I2S_SD_OUT = 10;  //select
+
+const gpio_num_t BUTTON_PIN = GPIO_NUM_6; // Only RTC IO are allowed - ESP32 Pin example
 
 // ----------------- SSL Certificates -----------------
 
