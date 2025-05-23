@@ -53,7 +53,8 @@ BufferPrint bufferPrint(audioBuffer);
 OpusAudioDecoder opusDecoder;
 BufferRTOS<uint8_t> audioBuffer(AUDIO_BUFFER_SIZE, AUDIO_CHUNK_SIZE);
 I2SStream i2s; 
-VolumeStream volume(i2s);
+PitchShiftOutput<int16_t, VariableSpeedRingBuffer<int16_t>> pitchShift(i2s);
+VolumeStream volume(pitchShift);
 QueueStream<uint8_t> queue(audioBuffer);
 StreamCopy copier(volume, queue);
 AudioInfo info(SAMPLE_RATE, CHANNELS, BITS_PER_SAMPLE);
@@ -130,6 +131,13 @@ void audioStreamTask(void *parameter) {
 
     config.copyFrom(info);  
     i2s.begin(config);    
+
+
+    auto pcfg = pitchShift.defaultConfig();
+    pcfg.copyFrom(info);
+    pcfg.pitch_shift = 1.5;
+    pcfg.buffer_size = 512;
+    pitchShift.begin(pcfg);
 
     auto vcfg = volume.defaultConfig();
     vcfg.copyFrom(config);
@@ -337,9 +345,10 @@ void websocketSetup(String server_domain, int port, String path)
 
 void networkTask(void *parameter) {
     while (1) {
-        xSemaphoreTake(wsMutex, portMAX_DELAY);
-        webSocket.loop();
-        xSemaphoreGive(wsMutex);
+        if ( deviceState != SLEEP )
+        {
+            webSocket.loop();
+        }
         vTaskDelay(1);
     }
 }
