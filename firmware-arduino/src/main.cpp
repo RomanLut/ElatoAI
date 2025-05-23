@@ -25,12 +25,12 @@ void enterSleep()
     Serial.println("Going to sleep...");
     
     // First, change device state to prevent any new data processing
-    deviceState = IDLE;
+    deviceState = SLEEP;
     scheduleListeningRestart = false;
     vTaskDelay(10);  //let all tasks accept state
 
     xSemaphoreTake(wsMutex, portMAX_DELAY);
-
+    
     // Stop audio tasks first
     i2s_stop(I2S_PORT_IN);
     i2s_stop(I2S_PORT_OUT);
@@ -97,6 +97,12 @@ static void onButtonDoubleClickCb(void *button_handle, void *usr_data)
     Serial.println("Button double click");
     delay(10);
     enterSleep();
+}
+
+static void onButtonSingleClickCb(void *button_handle, void *usr_data)
+{
+    //Serial.println("Button single click");
+    //scheduleListeningRestart = true;
 }
 
 void getAuthTokenFromNVS()
@@ -201,7 +207,8 @@ void setup()
         Button *btn = new Button(BUTTON_PIN, false);
         btn->attachLongPressUpEventCb(&onButtonLongPressUpEventCb, NULL);
         btn->attachDoubleClickEventCb(&onButtonDoubleClickCb, NULL);
-        btn->detachSingleClickEvent();
+        btn->attachSingleClickEventCb(&onButtonSingleClickCb, NULL);
+//        btn->detachSingleClickEvent();
     #endif
 
     pinMode( BUTTON_PIN, INPUT);
@@ -250,22 +257,25 @@ void setup()
 
     // WIFI
     setupWiFi();
+
+    lastActivity = millis();
 }
 
 void loop(){
     if (otaState == OTA_IN_PROGRESS)
     {
         loopOTA();
+        lastActivity = millis();
     }
 
     //Serial.printf("Pin:%d\n ", digitalRead( BUTTON_PIN));
 
-    if ( deviceState == SPEAKING )
+    if ( (deviceState == SPEAKING) || (deviceState == PROCESSING) )
     {
         lastActivity = millis();
     }
 
-    if ( ( millis() - lastActivity ) > ( deviceState == LISTENING ? 20 * 1000 : 60 * 1000 ) ) {
+    if ( ( millis() - lastActivity ) > 30 * 1000 ) {
         lastActivity = millis();
         Serial.println("Sleeping due to inactivity...");
         enterSleep();

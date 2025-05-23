@@ -44,7 +44,8 @@ enum DeviceState
     PROCESSING,
     WAITING,
     OTA,
-    FACTORY_RESET
+    FACTORY_RESET,
+    SLEEP
 };
 
 extern DeviceState deviceState;
