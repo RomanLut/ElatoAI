@@ -71,7 +71,7 @@ void transitionToSpeaking() {
 
     i2sInput.flush();
     
-    if (xSemaphoreTake(wsMutex, pdMS_TO_TICKS(100)) == pdTRUE) {
+    if (xSemaphoreTake(wsMutex, portMAX_DELAY) == pdTRUE) {
         deviceState = SPEAKING;
         //digitalWrite(I2S_SD_OUT, HIGH);
         speakingStartTime = millis();
@@ -97,7 +97,7 @@ void transitionToListening() {
 
     Serial.println("Transitioned to listening mode");
 
-    if (xSemaphoreTake(wsMutex, pdMS_TO_TICKS(100)) == pdTRUE) {
+    if (xSemaphoreTake(wsMutex, portMAX_DELAY) == pdTRUE) {
         deviceState = LISTENING;
         //digitalWrite(I2S_SD_OUT, LOW);
         webSocket.disableHeartbeat();
@@ -161,7 +161,7 @@ public:
             return 1;
         }
         
-        if (xSemaphoreTake(wsMutex, pdMS_TO_TICKS(100)) == pdTRUE) {
+        if (xSemaphoreTake(wsMutex, portMAX_DELAY) == pdTRUE) {
             webSocket.sendBIN(&b, 1);
             xSemaphoreGive(wsMutex);
             return 1;
@@ -176,7 +176,7 @@ public:
         }
         
         
-        if (xSemaphoreTake(wsMutex, pdMS_TO_TICKS(100)) == pdTRUE) {
+        if (xSemaphoreTake(wsMutex, portMAX_DELAY) == pdTRUE) {
             webSocket.sendBIN(buffer, size);
             xSemaphoreGive(wsMutex);
             return size;
@@ -352,4 +352,3 @@ void networkTask(void *parameter) {
         vTaskDelay(1);
     }
 }
-
