@@ -59,7 +59,7 @@ const uint16_t backend_port = 3000;
 #endif
 
 String authTokenGlobal;
-DeviceState deviceState = IDLE;
+volatile DeviceState deviceState = IDLE;
 
 unsigned long lastActivity = millis();
 

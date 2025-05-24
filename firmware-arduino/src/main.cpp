@@ -20,6 +20,10 @@ AsyncWebServer webServer(80);
 WIFIMANAGER WifiManager;
 esp_err_t getErr = ESP_OK;
 
+// Main Thread -> onButtonLongPressUpEventCb -> enterSleep()
+// Main Thread -> onButtonDoubleClickCb -> enterSleep()
+// Touch Task -> touchTask -> enterSleep()
+// Main Thread -> loop() (inactivity timeout) -> enterSleep()
 void enterSleep()
 {
     Serial.println("Going to sleep...");
@@ -36,14 +40,15 @@ void enterSleep()
     i2s_stop(I2S_PORT_OUT);
 
     // Clear any remaining audio in buffer
-    audioBuffer.reset();
+    outputFlushScheduled = true;
     
     // Properly disconnect WebSocket and wait for it to complete
     if (webSocket.isConnected()) {
         webSocket.disconnect();
         // Give some time for the disconnect to process
-        delay(100);
     }
+    xSemaphoreGive(wsMutex);
+    delay(100);
     
     // Stop all tasks that might be using I2S or other peripherals
     i2s_driver_uninstall(I2S_PORT_IN);

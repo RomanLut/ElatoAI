@@ -48,7 +48,7 @@ enum DeviceState
     SLEEP
 };
 
-extern DeviceState deviceState;
+extern volatile DeviceState deviceState;
 
 extern unsigned long lastActivity;
 
