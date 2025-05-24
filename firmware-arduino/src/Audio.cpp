@@ -36,7 +36,7 @@ public:
     if (webSocket.isConnected() && deviceState == SPEAKING) {
         return _buffer.writeArray(&data, 1);
     }
-    return 0;
+    return 1; //let opusDecoder write, otherwise thread will stuck
   }
 
   // networkTask -> webSocket.loop() -> webSocketEvent(WStype_BIN, ...) -> opusDecoder.write() -> bufferPrint.write()
@@ -44,7 +44,7 @@ public:
     if (webSocket.isConnected() && deviceState == SPEAKING) {
         return _buffer.writeArray(buffer, size);
     }
-    return 0;
+    return size; //let opusDecoder write, otherwise thread will stuck
   }
 
 private:
@@ -117,6 +117,8 @@ void audioStreamTask(void *parameter) {
     opusDecoder.setOutput(bufferPrint);
     opusDecoder.begin(cfg);
     xSemaphoreGive(wsMutex);
+
+    audioBuffer.setReadMaxWait(0);
     
     queue.begin();
 
@@ -142,7 +144,7 @@ void audioStreamTask(void *parameter) {
     auto vcfg = volume.defaultConfig();
     vcfg.copyFrom(config);
     vcfg.allow_boost = true;
-    volume.begin(vcfg);   
+    volume.begin(vcfg);
 
     while (1) {
         if ( outputFlushScheduled) {
@@ -154,7 +156,11 @@ void audioStreamTask(void *parameter) {
         }
 
         if (webSocket.isConnected() && deviceState == SPEAKING) {
-            copier.copy();  
+            copier.copy();
+        }
+        else {
+            //we should always read from audioBuffer, otherwise writing thread can stuck
+            queue.read();
         }
         vTaskDelay(1); 
     }
@@ -292,7 +298,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
                 // Check if volume_control is included in the message
                 if (doc.containsKey("volume_control")) {
                     int newVolume = doc["volume_control"].as<int>();
-                    volume.setVolume(newVolume / 100.0f);
+                    volume.setVolume(newVolume / 100.0f * 1.4f);
                 }
 
                 scheduleListeningRestart = true;
@@ -358,18 +364,16 @@ void websocketSetup(String server_domain, int port, String path)
 // networkTask -> webSocket.loop()
 void networkTask(void *parameter) {
     while (1) {
-        if ( deviceState != SLEEP )
-        {
-            xSemaphoreTake(wsMutex, portMAX_DELAY);
+        xSemaphoreTake(wsMutex, portMAX_DELAY);
 
-            // Check to see if a transition to listening mode is scheduled.
-            if (scheduleListeningRestart && millis() >= scheduledTime) {
-                transitionToListening();
-            }
-
-            webSocket.loop();
-            xSemaphoreGive(wsMutex);
+        // Check to see if a transition to listening mode is scheduled.
+        if (scheduleListeningRestart && millis() >= scheduledTime) {
+            transitionToListening();
         }
+
+        webSocket.loop();
+        xSemaphoreGive(wsMutex);
+
         vTaskDelay(1);
     }
 }

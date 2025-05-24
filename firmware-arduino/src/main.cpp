@@ -31,17 +31,19 @@ void enterSleep()
     // First, change device state to prevent any new data processing
     deviceState = SLEEP;
     scheduleListeningRestart = false;
+    outputFlushScheduled = true;
+    i2sInputFlushScheduled = true;
     vTaskDelay(10);  //let all tasks accept state
 
     xSemaphoreTake(wsMutex, portMAX_DELAY);
-    
+
     // Stop audio tasks first
     i2s_stop(I2S_PORT_IN);
     i2s_stop(I2S_PORT_OUT);
 
     // Clear any remaining audio in buffer
     outputFlushScheduled = true;
-    
+
     // Properly disconnect WebSocket and wait for it to complete
     if (webSocket.isConnected()) {
         webSocket.disconnect();
@@ -49,7 +51,7 @@ void enterSleep()
     }
     xSemaphoreGive(wsMutex);
     delay(100);
-    
+
     // Stop all tasks that might be using I2S or other peripherals
     i2s_driver_uninstall(I2S_PORT_IN);
     i2s_driver_uninstall(I2S_PORT_OUT);
