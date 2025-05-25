@@ -7,6 +7,8 @@
 #include <WebSocketsClient.h>
 #include "Audio.h"
 
+#include "PitchShiftFixed.h"
+
 // WEBSOCKET
 SemaphoreHandle_t wsMutex;
 WebSocketsClient webSocket;
@@ -55,7 +57,8 @@ BufferPrint bufferPrint(audioBuffer);
 OpusAudioDecoder opusDecoder;  //access guarded by wsmutex
 BufferRTOS<uint8_t> audioBuffer(AUDIO_BUFFER_SIZE, AUDIO_CHUNK_SIZE);  //producer: networkTask, consumer: audioStreamTask. Thread safe in single producer->single consumer scenario.
 I2SStream i2s; //access from audioStreamTask only
-PitchShiftOutput<int16_t, VariableSpeedRingBuffer<int16_t>> pitchShift(i2s);
+//PitchShiftOutput<int16_t, VariableSpeedRingBuffer<int16_t>> pitchShift(i2s);
+PitchShiftFixedOutput pitchShift(i2s);
 VolumeStream volume(pitchShift); //access from audioStreamTask only
 QueueStream<uint8_t> queue(audioBuffer); //access from audioStreamTask only
 StreamCopy copier(volume, queue);
