@@ -79,7 +79,7 @@ void transitionToSpeaking() {
     //digitalWrite(I2S_SD_OUT, HIGH);
     speakingStartTime = millis();
     
-    webSocket.enableHeartbeat(30000, 15000, 3);
+    webSocket.enableHeartbeat(30000, 15000, 12);
     
     Serial.println("Transitioned to speaking mode");
 }
