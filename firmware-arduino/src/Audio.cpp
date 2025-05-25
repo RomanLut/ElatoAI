@@ -196,7 +196,8 @@ public:
 
 WebsocketStream wsStream; //guard with wsMutex
 I2SStream i2sInput; //access from micTask only
-StreamCopy micToWsCopier(wsStream, i2sInput);
+VolumeStream volumeIn(wsStream); //guard with wsMutex
+StreamCopy micToWsCopier(volumeIn, i2sInput);
 volatile bool i2sInputFlushScheduled = false;
 const int MIC_COPY_SIZE = 64;
 
@@ -218,6 +219,13 @@ void micTask(void *parameter) {
     i2sInput.begin(i2sConfig);
 
     micToWsCopier.setDelayOnNoData(0);
+
+    auto vcfg = volume.defaultConfig();
+    vcfg.copyFrom(i2sConfig);
+    vcfg.allow_boost = true;
+    volume.begin(vcfg);
+
+    volumeIn.setVolume( 8.0f );
 
     while (1) {
         if ( i2sInputFlushScheduled ) {
