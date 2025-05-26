@@ -6,7 +6,7 @@
 
 #include "AudioTools.h"
 
-//pitch shift effect with interpolaion fixed to 1.5 frequency factor, fixed delay, int16_t, 1 channel
+//pitch shift effect with useable range upto 4x, buffer size is fixed to 512, format is fixed to int16_t, 1 channel
 class PitchShiftFixedOutput : public AudioOutput {
 public:
   PitchShiftFixedOutput(Print &out) { p_out = &out; }
