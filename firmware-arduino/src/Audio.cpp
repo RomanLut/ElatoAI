@@ -140,7 +140,7 @@ void audioStreamTask(void *parameter) {
 
     auto pcfg = pitchShift.defaultConfig();
     pcfg.copyFrom(info);
-    pcfg.pitch_shift = 1.5;
+    pcfg.pitch_shift = 1.5f;
     pcfg.buffer_size = 512;
     pitchShift.begin(pcfg);
 

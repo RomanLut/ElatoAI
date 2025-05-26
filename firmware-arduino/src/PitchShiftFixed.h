@@ -17,12 +17,7 @@ public:
     return result;
   }
 
-  bool begin(PitchShiftInfo info) {
-    TRACED();
-    cfg = info;
-    AudioOutput::setAudioInfo(info);
-    return true;
-  }
+  bool begin(PitchShiftInfo info);
 
   size_t write(const uint8_t *data, size_t len) override {
     size_t result = 0;
@@ -44,4 +39,6 @@ protected:
   Print *p_out = nullptr;
 
   int16_t pitchShift(int16_t value);
+  uint32_t pitchMul;
+  unsigned long secondaryOffset;
 };
