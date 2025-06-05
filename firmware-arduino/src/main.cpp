@@ -106,6 +106,7 @@ static void onButtonSingleClickCb(void *button_handle, void *usr_data)
     Serial.println("Button single click");
     scheduleListeningRestart = true;
     scheduledTime = millis(); 
+    talkInterruptScheduled = true;
 }
 
 void getAuthTokenFromNVS()
