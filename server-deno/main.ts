@@ -7,8 +7,8 @@ import type {
     WebSocketServer as _WebSocketServer,
 } from "npm:@types/ws";
 
-import { RealtimeClient } from "https://raw.githubusercontent.com/akdeb/openai-realtime-api-beta/refs/heads/main/lib/client.js";
-import { RealtimeUtils } from "https://raw.githubusercontent.com/akdeb/openai-realtime-api-beta/refs/heads/main/lib/utils.js";
+import { RealtimeClient } from "./realtime/client.js";
+import { RealtimeUtils } from "./realtime/utils.js";
 import { authenticateUser } from "./utils.ts";
 import {
     addConversation,
@@ -16,7 +16,6 @@ import {
     createSystemPrompt,
     getChatHistory,
     getDeviceInfo,
-    getOpenAiApiKey,
     getSupabaseClient,
     updateUserSessionTime,
 } from "./supabase.ts";
@@ -119,6 +118,7 @@ wss.on("connection", async (ws: WSWebSocket, payload: IPayload) => {
             volume_control: user.device?.volume ?? 100,
             is_ota: user.device?.is_ota ?? false,
             is_reset: user.device?.is_reset ?? false,
+            pitch_factor: user.personality?.pitch_factor ?? 1,
         }),
     );
 
@@ -131,6 +131,7 @@ wss.on("connection", async (ws: WSWebSocket, payload: IPayload) => {
         isDoctor,
     );
     const firstMessage = createFirstMessage(chatHistory, payload);
+    console.log("firstMessage", firstMessage);
     const systemPrompt = createSystemPrompt(chatHistory, payload);
     let sessionStartTime: number;
     let currentItemId: string | null = null;
@@ -146,7 +147,7 @@ wss.on("connection", async (ws: WSWebSocket, payload: IPayload) => {
         if (event.type === "session.created") {
             console.log("session created", event);
             sessionStartTime = Date.now();
-            sendFirstMessage(client, firstMessage ?? "");
+            sendFirstMessage(client, firstMessage);
         } else if (event.type === "session.updated") {
             console.log("session updated", event);
         } else if (event.type === "error") {

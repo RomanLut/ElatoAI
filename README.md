@@ -2,13 +2,13 @@
 
 # 🚀 ElatoAI: Realtime Speech AI Agents for ESP32
 
-Realtime AI Speech powered by OpenAI Realtime API, ESP32, Secure WebSockets, and Deno Edge Functions for >10-minute uninterrupted global conversations
+Realtime AI Speech powered by OpenAI Realtime API, ESP32, Secure WebSockets, and Deno Edge Functions for >15-minute uninterrupted global conversations
 
 
 <div align="center">
 
-[![Discord Follow](https://dcbadge.vercel.app/api/server/KJWxDPBRUj?style=flat)](https://discord.gg/KJWxDPBRUj)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://www.gnu.org/licenses/gpl-3.0.en.html)&ensp;&ensp;&ensp;
+[![Discord](https://img.shields.io/badge/Discord-80_members-5865F2?style=flat&logo=discord&logoColor=white)](https://discord.gg/KJWxDPBRUj)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 ![Node.js](https://img.shields.io/badge/Node.js-22.13.0-yellow.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-14.2.7-brightgreen.svg)
 ![React](https://img.shields.io/badge/React-18.2.0-blue.svg)
@@ -49,16 +49,21 @@ Control your ESP32 AI device from your phone with the Elato AI webapp.
   <img src="https://img.shields.io/badge/Quickstart%20Tutorial-YouTube-yellow?style=for-the-badge&logo=youtube" alt="Watch Demo on YouTube">
 </a>
 
+1. **Clone the repository**
 
-1. **Start Supabase**
-
-Install [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) and set up your Local Supabase Backend. From the root directory, run:
 ```bash
-brew install supabase/tap/supabase
-supabase start # Starts your local Supabase server with the default migrations and seed data.
+git clone git@github.com:akdeb/ElatoAI.git
 ```
 
-2. **Set up your NextJS Frontend**
+2. **Start Supabase**
+
+Install [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) and set up your Local Supabase Backend. Make sure you have [Docker Desktop](https://www.docker.com/products/docker-desktop/) set up. Then from the root directory, run:
+```bash
+brew install supabase/tap/supabase
+supabase start # This starts your local Supabase server with the default migrations and seed data.
+```
+
+3. **Set up your NextJS Frontend**
 
 ([See the Frontend README](frontend-nextjs/README.md)) 
 
@@ -76,9 +81,19 @@ cp .env.example .env.local
 npm run dev
 ```
 
-3. **Start the Deno server**
+4. **Choose edge server option**
 
-([See the Deno server README](server-deno/README.md))
+<img src="assets/devices.png" alt="Elato Mode" width="100%">
+
+- **ELATO MODE:** Got your own ESP32 DIY hardware device? We offer a fully hosted edge server for you to use! Register your device on the [settings page](https://www.elatoai.com/home/settings/device) and it will automatically connect to our edge server. Check out our [Pricing page](https://www.elatoai.com/#pricing) for more details.
+
+- **DEV MODE:** Alternatively, you can run your own edge server locally by following the instructions below and in the [Deno server README](server-deno/README.md).
+
+> **Pro Tip:** You can adjust this server setting in the `firmware-arduino/Config.h` file.
+
+5. **If you choose to run your own edge server locally:**
+
+
 ```bash
 # Navigate to the server directory
 cd server-deno
@@ -92,21 +107,22 @@ cp .env.example .env
 deno run -A --env-file=.env main.ts
 ```
 
-4. **Setup the ESP32 Device firmware**
+6. **Setup the ESP32 Device firmware**
 
 ([See the ESP32 Device README](firmware-arduino/README.md))
 
 In `Config.cpp` set `ws_server` and `backend_server` to your local IP address. Run `ifconfig` in your console and find `en0` -> `inet` -> `192.168.1.100` (it may be different for your Wifi network). This tells the ESP32 device to connect to your NextJS frontend and Deno server running on your local machine. All services should be on the same Wifi network.
 
-5. **Setup the ESP32 Device Wifi**
+7. **Setup the ESP32 Device Wifi**
 
 Build and upload the firmware to your ESP32 device. The ESP32 should open an `ELATO-DEVICE` captive portal to connect to Wifi. Connect to it and go to `http://192.168.4.1` to configure the device wifi.
 
-6. Once your Wifi credentials are configured, turn the device off and on again and it should connect to your Wifi and your server.
+8. **Turn on your device**
 
-7. Now you can talk to your AI Character!
+Once your Wifi credentials are configured, turn the device off and on again and it should connect to your Wifi and your server. Now you can talk to your AI Character!
 
-## 📦 Getting Started with multiple devices
+
+## 🤖🤖🤖 Getting Started with multiple devices
 
 1. Register your device by adding your ESP32 Device's MAC Address and a unique user code to the `devices` table in Supabase.
 > **Pro Tip:** To find your ESP32-S3 Device's MAC Address, build and upload `test/print_mac_address_test.cpp` using PlatformIO and view the serial monitor.
@@ -153,6 +169,7 @@ ElatoAI consists of three main components:
 18. **Button and Touch Support**: Use the button OR touch sensor to control the ESP32 device.
 19. **No PSRAM Required**: The ESP32 device does not require PSRAM to run the speech to speech AI.
 20. **OAuth for Web client**: OAuth for your users to manage their AI characters and devices.
+21. **Pitch Factor**: Control the pitch of the AI's voice from the NextJS webapp to create cartoon-like voices.
 
 ## 🛠 Tech Stack
 
@@ -241,7 +258,7 @@ lib_deps =
 
 ## 🚫 Limitations
 - 3-4s Cold start time while connecting to edge server
-- Limited to upto 10 minutes of uninterrupted conversations
+- Tested with up to 17 minutes of uninterrupted conversations
 - Edge server stops when wall clock time is exceeded
 - No speech interruption detection on ESP32
 

@@ -1,4 +1,5 @@
 #include "LEDHandler.h"
+#include "Audio.h"
 
 int brightness = 0;
 int fadeAmount = 5;
@@ -307,22 +308,25 @@ void ledTask(void *parameter)
          switch (deviceState)
         {
         case IDLE:
-            setStaticColor(StaticColor::GREEN);
+            setStaticColor(StaticColor::RED);
             break;
         case SOFT_AP:
             setStaticColor(StaticColor::MAGENTA);
             break;
         case PROCESSING:
-            setStaticColor(StaticColor::RED);
+            setStaticColor(StaticColor::BLUE);
             break;
         case SPEAKING:
             setStaticColor(StaticColor::BLUE);
             break;
         case LISTENING:
-            setStaticColor(StaticColor::YELLOW);
+            setStaticColor(webSocket.isConnected() ? StaticColor::YELLOW : StaticColor::RED);
             break;
         case OTA:
             setStaticColor(StaticColor::CYAN);
+            break;
+        case SLEEP:
+            setStaticColor(StaticColor::RED);
             break;
         default:
             setStaticColor(StaticColor::GREEN); // LED on

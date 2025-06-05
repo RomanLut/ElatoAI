@@ -9,8 +9,6 @@
 #include "Button.h"
 #include "FactoryReset.h"
 
-// #define WEBSOCKETS_DEBUG_LEVEL WEBSOCKETS_LEVEL_ALL
-
 #define TOUCH_THRESHOLD 28000
 #define LONG_PRESS_MS 1000
 #define REQUIRED_RELEASE_CHECKS 100     // how many consecutive times we need "below threshold" to confirm release
@@ -31,7 +29,7 @@ void enterSleep()
     // First, change device state to prevent any new data processing
     deviceState = SLEEP;
     scheduleListeningRestart = false;
-    outputFlushScheduled = true;
+    i2sOutputFlushScheduled = true;
     i2sInputFlushScheduled = true;
     vTaskDelay(10);  //let all tasks accept state
 
@@ -40,9 +38,6 @@ void enterSleep()
     // Stop audio tasks first
     i2s_stop(I2S_PORT_IN);
     i2s_stop(I2S_PORT_OUT);
-
-    // Clear any remaining audio in buffer
-    outputFlushScheduled = true;
 
     // Properly disconnect WebSocket and wait for it to complete
     if (webSocket.isConnected()) {
@@ -137,7 +132,6 @@ void setupWiFi()
     webServer.begin();
 }
 
-
 void touchTask(void* parameter) {
   touch_pad_init();
   touch_pad_config(TOUCH_PAD_NUM2);
@@ -177,7 +171,6 @@ void touchTask(void* parameter) {
   }
   vTaskDelete(NULL);
 }
-
 
 void setupDeviceMetadata() {
     // factoryResetDevice();
@@ -283,7 +276,7 @@ void loop(){
         lastActivity = millis();
     }
 
-    if ( ( millis() - lastActivity ) > 30 * 1000 ) {
+    if ( ( millis() - lastActivity ) > 60 * 1000 ) {
         lastActivity = millis();
         Serial.println("Sleeping due to inactivity...");
         enterSleep();
